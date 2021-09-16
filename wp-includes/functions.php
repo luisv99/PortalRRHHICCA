@@ -6,6 +6,35 @@
  */
 
 require ABSPATH . WPINC . '/option.php';
+/* add_action('phpmailer_init','send_smtp_email'); */
+/* function send_smtp_email( $phpmailer )
+{
+    // Para indicar que enviamos mediante SMTP
+    $phpmailer->isSMTP();
+ 
+    // Dirección del servidor de SMTP que utilizaremos para los envíos, por ejemplo smtp.gmail.com
+    $phpmailer->Host = "smtp.gmail.com";
+ 
+    // Si vamos a usar autenticación SMTP (true ó false), lo normal es "true"
+    $phpmailer->SMTPAuth = true;
+ 
+    // Puerto para el envío SMTP, según el tipo de envío, para normal el 25, para SLL el 465 y para TLS el 587
+    $phpmailer->Port = "25";
+ 
+    // Usuario de la cuenta de correo que usaremos para el envío (lo normal es la propia cuenta de mail)
+    $phpmailer->Username = "portaliccarrhh@gmail.com";
+ 
+    // Contraseña del usuario anterior (del correo) o de la autenticación SMTP
+    $phpmailer->Password = "guigui01";
+ 
+    // Tipo de encriptación utilizada (SSL o TLS), nosotros hemos usado siempre TLS
+	// Según lo que introduzcamos aquí tendremos que establecer el parámetro anterior $phpmailer->Port con el puerto correspondiente
+    $phpmailer->SMTPSecure = "tls";
+ 
+	//Lo que aparecerá en el Desde al recibir el mail
+    $phpmailer->From = "portaliccarrhh@gmail.com";
+    $phpmailer->FromName = "Portal RRHH";
+}  */
 
 /**
  * Convert given MySQL date string into a different format.

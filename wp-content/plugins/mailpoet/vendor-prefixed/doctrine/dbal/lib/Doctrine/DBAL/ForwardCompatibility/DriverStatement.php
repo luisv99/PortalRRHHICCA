@@ -1,2 +1,0 @@
-<?php
- namespace MailPoetVendor\Doctrine\DBAL\ForwardCompatibility; if (!defined('ABSPATH')) exit; use MailPoetVendor\Doctrine\DBAL; interface DriverStatement extends \MailPoetVendor\Doctrine\DBAL\Driver\Statement, \MailPoetVendor\Doctrine\DBAL\Result { } 
