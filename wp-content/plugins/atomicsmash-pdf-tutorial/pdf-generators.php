@@ -192,16 +192,20 @@ $year_select = $_POST['year'];
 $current_user = wp_get_current_user();
 $user_login = $current_user->user_login;
 
-$query_recibo_pago = $wpdb->get_results( "SELECT codigo_empleado, primer_nombre, segundo_nombre,primer_apellido,segundo_apellido,
-cedula,sueldo_diario, fecha_ingreso, cargo, departamento 
-FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
+$asignaciones = $wpdb->get_results( "SELECT t.codigo_empleado codigo,primer_nombre,segundo_nombre,primer_apellido,
+segundo_apellido,cedula,sueldo_diario,fecha_ingreso,cargo,departamento,concepto,fecha_movimiento,
+funcion_concepto, cantidad, monto_calculado
+FROM ic_recibos_de_pago rp
+INNER JOIN ic_trabajadores t on t.codigo_empleado=rp.codigo_empleado
+WHERE '$user_login' = t.codigo_empleado AND SUBSTRING(fecha_movimiento,4,2)='$month_select' AND 
+funcion_concepto= 'ASIGNACION' ;");
 
-    if ($query_recibo_pago != true){
+    if ($asignaciones != true){
         echo '<script>alert("No se encontraron resultados")</script>';
     }else{
 
-        foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
-            $codigo_empleado = $query->codigo_empleado;
+        foreach($asignaciones as $query){ //ASIGNACIONES Y DEDUCCIONES
+            $codigo_empleado = $query->codigo;
             $e_nombre = $query->primer_nombre; 
             $e_s_nombre = $query->segundo_nombre; 
             $e_p_apellido = $query->primer_apellido; 
@@ -230,7 +234,7 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
         //Cell(ANCHO, ALTO, TEXTO, BORDE (1,0), ln(0,1,2), ALIGN(L,C,R), FONDO(BOOLEAN))
     
         $pdf->SetTextColor(7,25,83); //COLOR AZUL PARA TEXTO DE CODIGO
-        $pdf->SetFillColor(157,176,232); // FONDO GRIS PARA CODIGO
+        $pdf->SetFillColor(183,191,232); // FONDO GRIS PARA CODIGO
         $pdf->Cell(25,10,utf8_decode('Codigo'),1,2,'C',true); //TEXTO DE CODIGO
     
         $pdf->SetTextColor(28, 27, 23); //COLOR NEGRO PARA TEXTO DEL NUMERO DE CODIGO 
@@ -238,7 +242,7 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
     
         $pdf-> Ln(2); //SALTO DE LINEA
         $pdf->SetTextColor(7,25,83); //COLOR AZUL PARA FECHA INGRESO
-        $pdf->SetFillColor(157,176,232); // FONDO GRIS PARA FECHA INGRESO
+        $pdf->SetFillColor(183,191,232); // FONDO GRIS PARA FECHA INGRESO
         $pdf->Cell(45,10,utf8_decode('FECHA INGRESO '),1,2,'C',true); //TEXTO DE FECHA INGRESO
         
         $pdf->SetTextColor(28, 27, 23); //COLOR NEGRO PARA FECHA INGRESO 
@@ -247,7 +251,7 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
         $pdf-> SetY(38);
         $pdf-> SetX(70);
         $pdf->SetTextColor(7,25,83); //COLOR AZUL PARA SUELDO
-        $pdf->SetFillColor(157,176,232); // FONDO GRIS PARA SUELDO
+        $pdf->SetFillColor(183,191,232); // FONDO GRIS PARA SUELDO
         $pdf->Cell(45,10,utf8_decode('SUELDO MENSUAL'),1,2,'C',true); //TEXTO DE SUELDO
         
         //$pdf-> SetY(40);
@@ -275,7 +279,7 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
         $pdf-> SetY(16);
         $pdf-> SetX(37);
         $pdf->SetTextColor(7,25,83); //COLOR AZUL PARA TEXTO DE NOMBRE
-        $pdf->SetFillColor(157,176,232); // FONDO GRIS PARA NOMBRE
+        $pdf->SetFillColor(183,191,232); // FONDO GRIS PARA NOMBRE
         $pdf->Cell(90,10,utf8_decode('NOMBRE '),1,0,'C',true); //TEXTO DE NOMBRE
         
         $pdf-> SetY(26);
@@ -290,7 +294,7 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
         $pdf-> SetY(16);
         $pdf-> SetX(129);
         $pdf->SetTextColor(7,25,83); //COLOR AZUL PARA TEXTO DE DPTO
-        $pdf->SetFillColor(157,176,232); // FONDO GRIS PARA DPTO
+        $pdf->SetFillColor(183,191,232); // FONDO GRIS PARA DPTO
         $pdf->Cell(90,10,utf8_decode('DEPARTAMENTO '),1,0,'C',true); //TEXTO DE DPTO
     
         $pdf-> SetY(26);
@@ -302,7 +306,7 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
         $pdf-> SetY(16);
         $pdf-> SetX(222);
         $pdf->SetTextColor(7,25,83); //COLOR AZUL PARA PERIODO DE PAGO
-        $pdf->SetFillColor(157,176,232); // FONDO GRIS PARA PERIODO DE PAGO
+        $pdf->SetFillColor(183,191,232); // FONDO GRIS PARA PERIODO DE PAGO
         $pdf->Cell(50,10,utf8_decode('PERIODO DE PAGO '),1,0,'C',true); //TEXTO DE PERIODO DE PAGO
     
         $pdf-> SetY(26);
@@ -313,7 +317,7 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
         $pdf-> SetY(16);
         $pdf-> SetX(275);
         $pdf->SetTextColor(7,25,83); //COLOR AZUL PARA CEDULA
-        $pdf->SetFillColor(157,176,232); // FONDO GRIS PARA CEDULA
+        $pdf->SetFillColor(183,191,232); // FONDO GRIS PARA CEDULA
         $pdf->Cell(50,10,utf8_decode('CEDULA'),1,0,'C',true); //TEXTO DE CEDULA
     
         $pdf-> SetY(26);
@@ -324,7 +328,7 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
         $pdf->Ln(30);
         
         
-        $pdf->SetTextColor(7,25,83);
+        /* $pdf->SetTextColor(7,25,83);
         $pdf->SetFillColor(157,176,232);
         $pdf->Cell(30,10, utf8_decode('CANTIDAD_A'),1,0,'C',1);
         $pdf->Cell(100,10, utf8_decode('DESCRIPCION_A'),1,0,'C',1);
@@ -335,20 +339,7 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
         $pdf->Cell(35,10, utf8_decode('MONTO_D'),1,2,'C',1);
         $pdf->Ln(-10);
     
-        $total_asignaciones =0;
-    
-        foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
-            $codigo_empleado = $query->codigo_empleado;
-            $e_nombre = $query->primer_nombre; 
-            $e_s_nombre = $query->segundo_nombre; 
-            $e_p_apellido = $query->primer_apellido; 
-            $e_s_apellido = $query->segundo_apellido; 
-            $e_cedula = $query->cedula; 
-            $e_sueldo = $query->sueldo_diario;
-            $e_fecha_ingreso = $query->fecha_ingreso; 
-            $e_cargo = $query->cargo;
-            $total_asignaciones = $total_asignaciones + $e_sueldo;
-    
+        
             /* $pdf->Ln();
             $pdf->SetFillColor(255,255,255);
             $pdf->Cell(30,10, utf8_decode($e_nombre . ' ' . $e_s_nombre),1,0,'C',1);
@@ -359,7 +350,7 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
             $pdf->Cell(100,10, utf8_decode($e_p_apellido . ' '. $e_s_apellido),1,0,'C',1);
             $pdf->Cell(35,10, utf8_decode($e_sueldo),1,0,'C',1); */
     
-            }
+            /* }
             $pdf->Ln();
             $pdf->SetX($pdf->GetX()+90);
             $pdf->Cell(40,10, utf8_decode('Total Asignaciones'),1,0,'C',1);
@@ -369,13 +360,133 @@ FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
             $pdf->SetX($pdf->GetX()+95);
             $pdf->Cell(40,10, utf8_decode('Total_asignaciones'),1,0,'C',1);
             $pdf->SetX($pdf->GetX());
-            $pdf->Cell(35,10, utf8_decode($total_asignaciones),1,0,'C',1);
+            $pdf->Cell(35,10, utf8_decode($total_asignaciones),1,0,'C',1); */
            
-    
+            $pdf->SetXY(10,42);//Esquina del inicio del margen de la cabecera dependencia // 
+            
+            $posicion_MulticeldaDX= $pdf->GetX();//Aquí inicializo donde va a comenzar el primer recuadro en la posición X
+            $posicion_MulticeldaDY= $pdf->GetY();//Aquí inicializo donde va a comenzar el primer recuadro en la posición Y
+            //Estas lineas comentadas las ocupo para verificar la posición, imprime la posición de cada eje//
+            //$pdf->Cell(50,5,utf8_decode('Posicion X'  ." " .$posicion_MulticeldaDX),1,0,'C');
+            //$pdf->Cell(50,5,utf8_decode('Posicion Y'  ." " .$posicion_MulticeldaDY),1,0,'C');
+      //-------------------------------------------------------------------------//
+//**************************************************************************//
+          // Estas lineas son para asignar relleno, color del texto y color de lineas de contorno si mal no recuerdo //
+            $pdf->SetFillColor(224,235,255); 
+            $pdf->SetTextColor(0); 
+            $pdf->SetDrawColor(224,235,255);  
+            
+//*************************************************************************//
+            $pdf->SetFont( 'Arial', '', 12 );
+            //Recuadro que bordea toda tabla
+            $pdf->SetXY($posicion_MulticeldaDX,$posicion_MulticeldaDY+20); //Aquí le indicas la posición de la esquina superior izquierda para el primer multicell que envuelve toda la tabla o recuadro
+            $pdf->MultiCell(137,100,'',1);
+
+            $pdf->SetTextColor(7,25,83);
+            $pdf->SetDrawColor(16,22,114); 
+            $pdf->SetFillColor(183,191,232);
+            $pdf->SetXY($posicion_MulticeldaDX,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
+            $pdf->Cell(25,7,'CANTIDAD', 1,1,'C',true);
+
+            $pdf->SetXY($posicion_MulticeldaDX,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
+            $pdf->Cell(25,100,'', 1,1,'C');
+
+            $pdf->SetDrawColor(16,22,114);
+            $pdf->SetFillColor(183,191,232);
+            $pdf->SetXY($posicion_MulticeldaDX+25,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
+            $pdf->Cell(80,7,'DESCRIPCION', 1,1,'C',true);
+
+            $pdf->SetXY($posicion_MulticeldaDX+25,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
+            $pdf->Cell(80,100,'', 1,1,'C');
+
+            $pdf->SetDrawColor(16,22,114);
+            $pdf->SetFillColor(183,191,232);
+            $pdf->SetXY($posicion_MulticeldaDX+105,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
+            $pdf->Cell(32,7,'MONTO', 1,1,'C',true);
+
+            $pdf->SetXY($posicion_MulticeldaDX+105,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
+            $pdf->Cell(32,100,'', 1,1,'C');
+
+        $total_asignaciones=0;
+        $a_y1_position = 70;
+
+        $pdf->SetTextColor(0,0,0);
+        foreach($asignaciones as $query){ //CANTIDAD DE ASIGNACIONES
+            $a_cantidad = $query->cantidad;
+
+            $pdf->SetDrawColor(224,235,255); 
+            $pdf->SetXY($posicion_MulticeldaDX-3,$a_y1_position);
+            $pdf->Cell(30,5,$a_cantidad, 0,1,'C');
+            $a_y1_position = $a_y1_position+6;
+        }
+
+        $a_y2_position = 70;
+        foreach($asignaciones as $query){ //CANTIDAD DE ASIGNACIONES
+            $a_concepto = $query->concepto; 
+
+            $pdf->SetDrawColor(0,235,1);
+            $pdf->SetXY($posicion_MulticeldaDX+25,$a_y2_position);
+            $pdf->Cell(75,5,utf8_decode('$a_concepto CUMPLEANOS DEL TRABAJADOR'),0,1,'L',0);
+            $a_y2_position = $a_y2_position+6;
+        }
+
+        $a_y3_position = 70;
+        foreach($asignaciones as $query){ //CANTIDAD DE ASIGNACIONES
+            $a_monto_calulcado = $query->monto_calculado; 
+
+            $pdf->SetDrawColor(0,135,255); 
+            $pdf->SetXY($posicion_MulticeldaDX+100,$a_y3_position);
+            $pdf->Cell(37,5,$a_monto_calulcado, 0,1,'R');
+            $a_y3_position = $a_y3_position+6;
+        }
+
+            $pdf->SetFont( 'Arial', '', 12 );
+            $pdf->SetDrawColor(16,22,114);
+            $pdf->SetXY($posicion_MulticeldaDX+30,$posicion_MulticeldaDY+120);
+            $pdf->Cell(70,5,utf8_decode('Total asignaciones'),0,1,'R',0);
+
+            $pdf->SetDrawColor(16,22,114);
+            $pdf->SetXY($posicion_MulticeldaDX+100,$posicion_MulticeldaDY+120);
+            $pdf->Cell(37,5,utf8_decode($total_asignaciones),1,1,'L',0);
+
+
+
+            $pdf->Ln();  // Termina seccion de multicelda de datos de dependencia
+            $pdf->SetFont('','B');
+            $fill = True;
+            $pdf->SetXY(153,42); // Esquina del unicio de la cabecera del usuario//
+            $posicion_MulticeldaUX= $pdf->GetX();
+            $posicion_MulticeldaUY= $pdf->GetY();
+            $pdf->SetFillColor(224,235,255);
+            $pdf->SetTextColor(0);
+            $pdf->SetDrawColor(224,235,255);
+            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY);
+            $pdf->MultiCell(137,25,'',1);
+            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY);
+            $pdf->Cell(137,5,'DATOS DEL USUARIO', 1,1,'C',$fill);
+            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY+5);
+            $pdf->Cell(137,5,'NUMERO DE EMPLEADO:', 0,1,'L');
+            $pdf->SetXY($posicion_MulticeldaUX+40,$posicion_MulticeldaUY+5);
+            $pdf->Cell(80,5,utf8_decode('$numero_EmpleadoRH'),0,1,'L',0);
+            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY+10);
+            $pdf->Cell(137,5,'NOMBRE DE EMPLEADO:', 0,1,'L');
+            $pdf->SetXY($posicion_MulticeldaUX+40,$posicion_MulticeldaUY+10);
+            $pdf->Cell(80,5,utf8_decode('$nombre_EmpleadoRH'),0,1,'L',0);
+            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY+15);
+            $pdf->Cell(137,5,'NIVEL TABULAR:', 0,1,'L');
+            $pdf->SetXY($posicion_MulticeldaUX+40,$posicion_MulticeldaUY+15);
+            $pdf->Cell(80,5,utf8_decode('$nivel_TabularRH'),0,1,'L',0);
+            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY+20);
+            $pdf->Cell(137,5,'CATEGORIA O PUESTO:', 0,1,'L');
+            $pdf->SetXY($posicion_MulticeldaUX+40,$posicion_MulticeldaUY+20);
+            $pdf->Cell(80,5,utf8_decode('$puestoNominalRH'),0,1,'L',0);
+            $pdf->Ln();
+            
     
         $pdf->Output('D','recibo-pago.pdf');
         exit;
-    }
+    
+}
 }
 
 /* ==================================FIN OUTPUT RECIBO DE PAGO=============================================== */
