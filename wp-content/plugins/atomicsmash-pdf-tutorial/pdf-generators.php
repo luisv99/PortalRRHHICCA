@@ -200,7 +200,15 @@ INNER JOIN ic_trabajadores t on t.codigo_empleado=rp.codigo_empleado
 WHERE '$user_login' = t.codigo_empleado AND SUBSTRING(fecha_movimiento,4,2)='$month_select' AND 
 funcion_concepto= 'ASIGNACION' ;");
 
-    if ($asignaciones != true){
+$deducciones = $wpdb->get_results( "SELECT t.codigo_empleado codigo,primer_nombre,segundo_nombre,primer_apellido,
+segundo_apellido,cedula,sueldo_diario,fecha_ingreso,cargo,departamento,concepto,fecha_movimiento,
+funcion_concepto, cantidad, monto_calculado
+FROM ic_recibos_de_pago rp
+INNER JOIN ic_trabajadores t on t.codigo_empleado=rp.codigo_empleado
+WHERE '$user_login' = t.codigo_empleado AND SUBSTRING(fecha_movimiento,4,2)='$month_select' AND 
+funcion_concepto= 'DEDUCCION' ;");
+
+    if ($asignaciones and $deducciones != true){
         echo '<script>alert("No se encontraron resultados")</script>';
     }else{
 
@@ -222,9 +230,11 @@ funcion_concepto= 'ASIGNACION' ;");
         $month = strftime("%B"); //devuelve: mes actual
         $week_day = date("j");
         $year = date("Y");
-    
         $pdf = new FPDF();
         $pdf->AddPage('L', 'legal');
+        $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/08/logo-2.png';
+        //$pdf-> SetX(55);
+        $pdf->Image($ruta_imagen,80,100,170,40);
         $pdf->SetFont( 'Arial', '', 20 );
         
         $pdf->Cell(0,3, utf8_decode('RECIBO DE PAGO'),0,2,'C'); //TITULO
@@ -380,7 +390,7 @@ funcion_concepto= 'ASIGNACION' ;");
             $pdf->SetFont( 'Arial', '', 12 );
             //Recuadro que bordea toda tabla
             $pdf->SetXY($posicion_MulticeldaDX,$posicion_MulticeldaDY+20); //Aquí le indicas la posición de la esquina superior izquierda para el primer multicell que envuelve toda la tabla o recuadro
-            $pdf->MultiCell(137,100,'',1);
+            $pdf->MultiCell(142,100,'',1);
 
             $pdf->SetTextColor(7,25,83);
             $pdf->SetDrawColor(16,22,114); 
@@ -394,20 +404,19 @@ funcion_concepto= 'ASIGNACION' ;");
             $pdf->SetDrawColor(16,22,114);
             $pdf->SetFillColor(183,191,232);
             $pdf->SetXY($posicion_MulticeldaDX+25,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
-            $pdf->Cell(80,7,'DESCRIPCION', 1,1,'C',true);
+            $pdf->Cell(85,7,'DESCRIPCION', 1,1,'C',true);
 
             $pdf->SetXY($posicion_MulticeldaDX+25,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
-            $pdf->Cell(80,100,'', 1,1,'C');
+            $pdf->Cell(85,100,'', 1,1,'C');
 
             $pdf->SetDrawColor(16,22,114);
             $pdf->SetFillColor(183,191,232);
-            $pdf->SetXY($posicion_MulticeldaDX+105,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
+            $pdf->SetXY($posicion_MulticeldaDX+110,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
             $pdf->Cell(32,7,'MONTO', 1,1,'C',true);
 
-            $pdf->SetXY($posicion_MulticeldaDX+105,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
+            $pdf->SetXY($posicion_MulticeldaDX+110,$posicion_MulticeldaDY+20); // Esto posiciona cada etiqueta en base a la posición de la esquina 
             $pdf->Cell(32,100,'', 1,1,'C');
 
-        $total_asignaciones=0;
         $a_y1_position = 70;
 
         $pdf->SetTextColor(0,0,0);
@@ -426,33 +435,37 @@ funcion_concepto= 'ASIGNACION' ;");
 
             $pdf->SetDrawColor(0,235,1);
             $pdf->SetXY($posicion_MulticeldaDX+25,$a_y2_position);
-            $pdf->Cell(75,5,utf8_decode('$a_concepto CUMPLEANOS DEL TRABAJADOR'),0,1,'L',0);
+            $pdf->Cell(85,5,utf8_decode($a_concepto),0,1,'L',0);
             $a_y2_position = $a_y2_position+6;
         }
 
         $a_y3_position = 70;
+        $total_asignaciones = 0;
         foreach($asignaciones as $query){ //CANTIDAD DE ASIGNACIONES
             $a_monto_calulcado = $query->monto_calculado; 
+            $total_asignaciones = $total_asignaciones + $a_monto_calulcado;
 
             $pdf->SetDrawColor(0,135,255); 
-            $pdf->SetXY($posicion_MulticeldaDX+100,$a_y3_position);
+            $pdf->SetXY($posicion_MulticeldaDX+105,$a_y3_position);
             $pdf->Cell(37,5,$a_monto_calulcado, 0,1,'R');
             $a_y3_position = $a_y3_position+6;
         }
 
-            $pdf->SetFont( 'Arial', '', 12 );
+            $pdf->SetFont( 'Arial', 'B', 14 );
             $pdf->SetDrawColor(16,22,114);
-            $pdf->SetXY($posicion_MulticeldaDX+30,$posicion_MulticeldaDY+120);
+            $pdf->SetTextColor(7,25,83);
+            $pdf->SetXY($posicion_MulticeldaDX+40,$posicion_MulticeldaDY+120);
             $pdf->Cell(70,5,utf8_decode('Total asignaciones'),0,1,'R',0);
 
             $pdf->SetDrawColor(16,22,114);
-            $pdf->SetXY($posicion_MulticeldaDX+100,$posicion_MulticeldaDY+120);
-            $pdf->Cell(37,5,utf8_decode($total_asignaciones),1,1,'L',0);
+            $pdf->SetTextColor(0); 
+            $pdf->SetXY($posicion_MulticeldaDX+110,$posicion_MulticeldaDY+120);
+            $pdf->Cell(32,5,utf8_decode($total_asignaciones),1,1,'C',0);
 
 
 
             $pdf->Ln();  // Termina seccion de multicelda de datos de dependencia
-            $pdf->SetFont('','B');
+            $pdf->SetFont('','');
             $fill = True;
             $pdf->SetXY(153,42); // Esquina del unicio de la cabecera del usuario//
             $posicion_MulticeldaUX= $pdf->GetX();
@@ -460,27 +473,74 @@ funcion_concepto= 'ASIGNACION' ;");
             $pdf->SetFillColor(224,235,255);
             $pdf->SetTextColor(0);
             $pdf->SetDrawColor(224,235,255);
-            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY);
-            $pdf->MultiCell(137,25,'',1);
-            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY);
-            $pdf->Cell(137,5,'DATOS DEL USUARIO', 1,1,'C',$fill);
-            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY+5);
-            $pdf->Cell(137,5,'NUMERO DE EMPLEADO:', 0,1,'L');
-            $pdf->SetXY($posicion_MulticeldaUX+40,$posicion_MulticeldaUY+5);
-            $pdf->Cell(80,5,utf8_decode('$numero_EmpleadoRH'),0,1,'L',0);
-            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY+10);
-            $pdf->Cell(137,5,'NOMBRE DE EMPLEADO:', 0,1,'L');
-            $pdf->SetXY($posicion_MulticeldaUX+40,$posicion_MulticeldaUY+10);
-            $pdf->Cell(80,5,utf8_decode('$nombre_EmpleadoRH'),0,1,'L',0);
-            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY+15);
-            $pdf->Cell(137,5,'NIVEL TABULAR:', 0,1,'L');
-            $pdf->SetXY($posicion_MulticeldaUX+40,$posicion_MulticeldaUY+15);
-            $pdf->Cell(80,5,utf8_decode('$nivel_TabularRH'),0,1,'L',0);
-            $pdf->SetXY($posicion_MulticeldaUX,$posicion_MulticeldaUY+20);
-            $pdf->Cell(137,5,'CATEGORIA O PUESTO:', 0,1,'L');
-            $pdf->SetXY($posicion_MulticeldaUX+40,$posicion_MulticeldaUY+20);
-            $pdf->Cell(80,5,utf8_decode('$puestoNominalRH'),0,1,'L',0);
-            $pdf->Ln();
+            $pdf->SetFont( 'Arial', '', 12 );
+
+            $pdf->SetXY($posicion_MulticeldaUX+5,$posicion_MulticeldaUY+20);
+            $pdf->MultiCell(162,100,'',1);
+
+            $pdf->SetXY($posicion_MulticeldaUX+5,$posicion_MulticeldaUY+20);
+            $pdf->Cell(25,7,'CANTIDAD', 1,1,'C',$fill);
+            $pdf->SetXY($posicion_MulticeldaUX+5,$posicion_MulticeldaUY+20);
+
+            $pdf->Cell(25,100,'', 1,1,'C');
+
+            $pdf->SetXY($posicion_MulticeldaUX+30,$posicion_MulticeldaUY+20);
+            $pdf->Cell(100,7,'DESCRIPCION', 1,1,'C',$fill);
+
+            $pdf->SetXY($posicion_MulticeldaUX+30,$posicion_MulticeldaUY+20);
+            $pdf->Cell(100,100,'', 1,1,'C');
+
+            $pdf->SetXY($posicion_MulticeldaUX+130,$posicion_MulticeldaUY+20);
+            $pdf->Cell(37,7,'MONTO', 1,1,'C',$fill);
+
+            $pdf->SetXY($posicion_MulticeldaUX+130,$posicion_MulticeldaUY+20);
+            $pdf->Cell(37,100,'', 1,1,'C');
+
+
+            $d_y1_position = 70;
+            foreach($deducciones as $query){ //CANTIDAD DE ASIGNACIONES
+                $d_cantidad = $query->cantidad;
+                
+                $pdf->SetDrawColor(224,235,255); 
+                $pdf->SetXY($posicion_MulticeldaUX+2,$d_y1_position);
+                $pdf->Cell(30,5,$d_cantidad, 0,1,'C');
+                $d_y1_position = $d_y1_position+6;
+            }
+            
+            $pdf->SetTextColor(0,0,0);
+
+            $d_y2_position = 70;
+            foreach($deducciones as $query){ //CANTIDAD DE ASIGNACIONES
+                $d_concepto = $query->concepto;
+                
+                $pdf->SetDrawColor(224,235,255); 
+                $pdf->SetXY($posicion_MulticeldaUX+35,$d_y2_position);
+                $pdf->Cell(30,5,$d_concepto, 0,1,'C');
+                $d_y2_position = $d_y2_position+6;
+            }
+
+            $d_y3_position = 70;
+            $total_deducciones = 0;
+            foreach($deducciones as $query){ //CANTIDAD DE ASIGNACIONES
+                $d_monto_calculado = $query->monto_calculado;
+                $total_deducciones = $total_deducciones + $d_monto_calculado;
+
+                $pdf->SetDrawColor(224,235,255); 
+                $pdf->SetXY($posicion_MulticeldaUX+135,$d_y3_position);
+                $pdf->Cell(30,5,$d_monto_calculado, 0,1,'R');
+                $d_y3_position = $d_y3_position+6;
+            }
+
+            $pdf->SetFont( 'Arial', 'B', 14 );
+            $pdf->SetDrawColor(16,22,114);
+            $pdf->SetTextColor(7,25,83);
+            $pdf->SetXY($posicion_MulticeldaDX+200,$posicion_MulticeldaDY+120);
+            $pdf->Cell(70,5,utf8_decode('Total Deducciones'),0,1,'R',0);
+
+            $pdf->SetDrawColor(16,22,114);
+            $pdf->SetTextColor(0); 
+            $pdf->SetXY($posicion_MulticeldaDX+273,$posicion_MulticeldaDY+120);
+            $pdf->Cell(37,5,utf8_decode($total_deducciones),1,1,'C',0);
             
     
         $pdf->Output('D','recibo-pago.pdf');
