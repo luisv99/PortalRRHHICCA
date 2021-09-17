@@ -455,12 +455,12 @@ funcion_concepto= 'DEDUCCION' ;");
             $pdf->SetDrawColor(16,22,114);
             $pdf->SetTextColor(7,25,83);
             $pdf->SetXY($posicion_MulticeldaDX+40,$posicion_MulticeldaDY+120);
-            $pdf->Cell(70,5,utf8_decode('Total asignaciones'),0,1,'R',0);
+            $pdf->Cell(70,8,utf8_decode('Total asignaciones'),0,1,'R',0);
 
             $pdf->SetDrawColor(16,22,114);
             $pdf->SetTextColor(0); 
             $pdf->SetXY($posicion_MulticeldaDX+110,$posicion_MulticeldaDY+120);
-            $pdf->Cell(32,5,utf8_decode($total_asignaciones),1,1,'C',0);
+            $pdf->Cell(32,8,utf8_decode($total_asignaciones),1,1,'C',0);
 
 
 
@@ -478,25 +478,31 @@ funcion_concepto= 'DEDUCCION' ;");
             $pdf->SetXY($posicion_MulticeldaUX+5,$posicion_MulticeldaUY+20);
             $pdf->MultiCell(162,100,'',1);
 
+            $pdf->SetDrawColor(16,22,114); 
+            $pdf->SetFillColor(183,191,232);
+            $pdf->SetTextColor(7,25,83);
             $pdf->SetXY($posicion_MulticeldaUX+5,$posicion_MulticeldaUY+20);
             $pdf->Cell(25,7,'CANTIDAD', 1,1,'C',$fill);
             $pdf->SetXY($posicion_MulticeldaUX+5,$posicion_MulticeldaUY+20);
-
             $pdf->Cell(25,100,'', 1,1,'C');
 
+            $pdf->SetDrawColor(16,22,114); 
+            $pdf->SetFillColor(183,191,232);
             $pdf->SetXY($posicion_MulticeldaUX+30,$posicion_MulticeldaUY+20);
             $pdf->Cell(100,7,'DESCRIPCION', 1,1,'C',$fill);
 
             $pdf->SetXY($posicion_MulticeldaUX+30,$posicion_MulticeldaUY+20);
             $pdf->Cell(100,100,'', 1,1,'C');
 
+            $pdf->SetDrawColor(16,22,114); 
+            $pdf->SetFillColor(183,191,232);
             $pdf->SetXY($posicion_MulticeldaUX+130,$posicion_MulticeldaUY+20);
             $pdf->Cell(37,7,'MONTO', 1,1,'C',$fill);
 
             $pdf->SetXY($posicion_MulticeldaUX+130,$posicion_MulticeldaUY+20);
             $pdf->Cell(37,100,'', 1,1,'C');
 
-
+            $pdf->SetTextColor(0);
             $d_y1_position = 70;
             foreach($deducciones as $query){ //CANTIDAD DE ASIGNACIONES
                 $d_cantidad = $query->cantidad;
@@ -514,8 +520,8 @@ funcion_concepto= 'DEDUCCION' ;");
                 $d_concepto = $query->concepto;
                 
                 $pdf->SetDrawColor(224,235,255); 
-                $pdf->SetXY($posicion_MulticeldaUX+35,$d_y2_position);
-                $pdf->Cell(30,5,$d_concepto, 0,1,'C');
+                $pdf->SetXY($posicion_MulticeldaUX+30,$d_y2_position);
+                $pdf->Cell(100,5,$d_concepto, 0,1,'L');
                 $d_y2_position = $d_y2_position+6;
             }
 
@@ -526,8 +532,8 @@ funcion_concepto= 'DEDUCCION' ;");
                 $total_deducciones = $total_deducciones + $d_monto_calculado;
 
                 $pdf->SetDrawColor(224,235,255); 
-                $pdf->SetXY($posicion_MulticeldaUX+135,$d_y3_position);
-                $pdf->Cell(30,5,$d_monto_calculado, 0,1,'R');
+                $pdf->SetXY($posicion_MulticeldaUX+130,$d_y3_position);
+                $pdf->Cell(37,5,$d_monto_calculado, 0,1,'R');
                 $d_y3_position = $d_y3_position+6;
             }
 
@@ -535,12 +541,25 @@ funcion_concepto= 'DEDUCCION' ;");
             $pdf->SetDrawColor(16,22,114);
             $pdf->SetTextColor(7,25,83);
             $pdf->SetXY($posicion_MulticeldaDX+200,$posicion_MulticeldaDY+120);
-            $pdf->Cell(70,5,utf8_decode('Total Deducciones'),0,1,'R',0);
+            $pdf->Cell(70,8,utf8_decode('Total Deducciones'),0,1,'R',0);
 
             $pdf->SetDrawColor(16,22,114);
             $pdf->SetTextColor(0); 
             $pdf->SetXY($posicion_MulticeldaDX+273,$posicion_MulticeldaDY+120);
-            $pdf->Cell(37,5,utf8_decode($total_deducciones),1,1,'C',0);
+            $pdf->Cell(37,8,utf8_decode($total_deducciones),1,1,'C',0);
+
+            $pdf->SetFillColor(183,191,232);
+            $pdf->SetFont( 'Arial', 'B', 12 );
+            $pdf->SetDrawColor(16,22,114);
+            $pdf->SetTextColor(7,25,83);
+            $pdf->SetXY($posicion_MulticeldaDX+273,$posicion_MulticeldaDY+130);
+            $pdf->Cell(37,8,utf8_decode('NETO A PAGAR'),1,1,'C',true);
+
+            $pdf->SetFont( 'Arial', 'B', 14 );
+            $pdf->SetDrawColor(16,22,114);
+            $pdf->SetTextColor(0); 
+            $pdf->SetXY($posicion_MulticeldaDX+273,$posicion_MulticeldaDY+138);
+            $pdf->Cell(37,7,utf8_decode($total_deducciones),1,1,'L',0);
             
     
         $pdf->Output('D','recibo-pago.pdf');
@@ -941,6 +960,8 @@ if (isset($_POST['generate_p_sociales_pdf'])){
     $current_user = wp_get_current_user();
     $user_login = $current_user->user_login;
 
+    
+
     $query_recibo_pago = $wpdb->get_results( "SELECT codigo_empleado, primer_nombre, segundo_nombre,primer_apellido,segundo_apellido,
     cedula,sueldo_diario, fecha_ingreso, cargo, departamento, edo_civil, rif
     FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
@@ -960,6 +981,7 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     $e_rif = $query->rif;
     //$total_asignaciones = $total_asignaciones + $e_sueldo;
     }
+
 
     if(strtolower($e_estado_civil)=="s"){
         $e_estado_civil= "Soltero";
@@ -1346,6 +1368,14 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
         $e_estado_civil= "Concubino";
     }
 
+    if($monto_sueldo_quincena > $e_sueldo and $sueldo_o_quincena=='SUELDO'){
+        echo "<script>alert('El monto ingresado es mayor a su sueldo mensual')</script>";
+    }elseif($monto_sueldo_quincena > ($e_sueldo/2) and $sueldo_o_quincena=='QUINCENA'){
+        echo "<script>alert('El monto ingresado es mayor a su quincena')</script>";
+    }else{
+
+    
+
     if($monto_sueldo_quincena != ' ' and $sueldo_o_quincena == 'QUINCENA'){ 
         $insert_sueldo_quincena = $wpdb->insert(
             'ic_adelanto_quincena_sueldo',
@@ -1505,7 +1535,7 @@ FECHA DE RECEPCIÓN:
     $pdf->Output('D','adelanto_quincena_o_sueldo.pdf');
     exit;
 
-
+    }
 }
 
 add_action( 'admin_post_my_action', 'prefix_admin_my_action' );
@@ -1515,53 +1545,94 @@ function prefix_admin_my_action() {
     echo "<script>alert('hola')</script>";
 }
 
-/* if (isset($_POST['buscar_tipo_solicitud'])){
-    if($_POST['tipo_solicitud'] == 1){
-        echo "<script>alert('ola')</script>";
-        
-        echo "<script>document.getElementById('con_bono').style.display = 'block'</script>";
-    }
-} */
 
-/* if( isset($_POST['search_constancias'])){
-    $codigo_trabajador = $_POST['code'];
-    global $wpdb;
-    $query = $wpdb->get_results( "SELECT * FROM ic_constancias_trabajo 
-    WHERE '$codigo_trabajador' = codigo_empleado "); 
+global $wpdb;
+    $current_user = wp_get_current_user();
+    $user_login = $current_user->user_login;
+    $nombre = $current_user->user_firstname;
+    $apellido = $current_user->user_lastname;
+
+if(isset($_POST['send_mail_ausencia'])) {
+
+    if($_FILES['file_upload_ausencia']['name']){
+
     
-    foreach ($query as $row) {
-        $id = $row->ID; 
-        $codigo_empleado = $row-> codigo_empleado;
-        $nombre = $row->nombre; 
-        $apellido = $row->apellido; 
-        $fecha = $row->fecha; 
+
+
+    $filenameee =  $_FILES['file_upload_ausencia']['name'];
+    $fileName = $_FILES['file_upload_ausencia']['tmp_name']; 
+    $usermessage = $_POST['mensaje_ausencia'];
+    $fecha_ausencia = $_POST['fecha_ausencia'];
+    
+    $message ="TRABAJADOR = ". $nombre . ' '. $apellido . "\r\n
+
+CÓDIGO = " . $user_login . "\r\n 
+
+FECHA DE LA AUSENCIA = " . $fecha_ausencia . "\r\n
+
+MENSAJE =" . $usermessage;
+
+
+    
+    $subject ="JUSTIFICACIÓN DE AUSENCIA LABORAL";
+    $fromname ="My Website Name";
+    $fromemail = 'portaliccarrhh@gmail.com';  //if u dont have an email create one on your cpanel
+    $mailto = 'luisvar2703@gmail.com';  //the email which u want to recv this email
+
+    $content = file_get_contents($fileName);
+    $content = chunk_split(base64_encode($content));
+    // a random hash will be necessary to send mixed content
+    $separator = md5(time());
+    // carriage return type (RFC)
+    $eol = "\r\n";
+    // main header (multipart mandatory)
+    $headers = "From: ".$fromname." <".$fromemail.">" . $eol;
+    $headers .= "MIME-Version: 1.0" . $eol;
+    $headers .= "Content-Type: multipart/mixed; boundary=\"" . $separator . "\"" . $eol;
+    $headers .= "Content-Transfer-Encoding: 7bit" . $eol;
+    $headers .= "This is a MIME encoded message." . $eol;
+    // message
+    $body = "--" . $separator . $eol;
+    $body .= "Content-Type: text/plain; charset=\"iso-8859-1\"" . $eol;
+    $body .= "Content-Transfer-Encoding: 8bit" . $eol;
+    $body .= $message . $eol;
+    // attachment
+    $body .= "--" . $separator . $eol;
+    $body .= "Content-Type: application/octet-stream; name=\"" . $filenameee . "\"" . $eol;
+    $body .= "Content-Transfer-Encoding: base64" . $eol;
+    $body .= "Content-Disposition: attachment" . $eol;
+    $body .= $content . $eol;
+    $body .= $message . $separator . "--";
+    //SEND Mail
+
+    if (mail($mailto, $subject, $body, $headers)) {
+        echo "mail send ... OK"; // do what you want after sending the email
+        
+        
+    } else {
+        echo "mail send ... ERROR!";
+        print_r( error_get_last() );
     }
-    if($query == true){
-        echo "<script>alert('Resultados encontrados')</script>";
-        echo "<div class='table_container'>
-        <table>
-            <tr>
-            <th style='padding-left:10px'>ID</th>
-                <th>Codigo del Trabajador2</th>
-                <th>Solicitante2</th>
-                <th>Fecha2</th>
-                </tr>
-                
-                <tr>
-                <td>" . $id . "</td>
-                <td>". $codigo_empleado . "</td>
-                <td>" . $nombre. ' '. $apellido . "</td>
-                <td>" . $fecha . "</td>
-                </tr>
-                
-                
-                </table>	
-                </div>";
-    }else{
-        echo "<script>alert('NO Resultados encontrados')</script>";
-    }
+}else{
+    $mensaje_ausencia= $_POST['mensaje_ausencia'];
+$fecha_ausencia = $_POST['fecha_ausencia'];
+$fecha_con_formato = strtotime($fecha_ausencia);
+
+$new_date = date("d-m-Y", $fecha_con_formato );
+echo "Nombre: " . $nombre . '<br>';
+
+    $para      = 'luisvar2703@gmail.com';
+    $asunto    = 'Justificacion de ausencia laboral del trabajador ' . $nombre . ' ' . $apellido;
+    $descripcion   = 'Código de trabajador: '. $user_login .'                                  Fecha de la ausencia:  '.$new_date . '                                                                             
+                                                                    
+'. $mensaje_ausencia;
+
+    $de = 'From: portalicca@icca.com';
+
+    mail($para, $asunto, $descripcion, $de);
 }
- */
+
+}
 /* ====================================ENVIO DE GMAIL CON PDF ADJUNTO =======================================*/
 /* ====================================ENVIO DE GMAIL CON PDF ADJUNTO =======================================*/
 /* ====================================ENVIO DE GMAIL CON PDF ADJUNTO =======================================*/
