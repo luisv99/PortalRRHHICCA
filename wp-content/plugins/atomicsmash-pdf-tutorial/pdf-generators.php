@@ -212,6 +212,7 @@ funcion_concepto= 'DEDUCCION' ;");
         echo '<script>alert("No se encontraron resultados")</script>';
     }else{
 
+        
         foreach($asignaciones as $query){ //ASIGNACIONES Y DEDUCCIONES
             $codigo_empleado = $query->codigo;
             $e_nombre = $query->primer_nombre; 
@@ -225,6 +226,14 @@ funcion_concepto= 'DEDUCCION' ;");
             $departamento = $query-> departamento;
             //$total_asignaciones = $total_asignaciones + $e_sueldo;
         }
+        $insert = $wpdb->insert(
+            'ic_recibos_de_pago_solicitados',
+                array(
+                'codigo_empleado'=>$user_login,
+                'nombres'=>$e_nombre.' '.$e_s_nombre,
+                'apellidos'=>$e_p_apellido.' '.$e_s_apellido,
+                'periodo'=> $month_select .'/'.'20'.$year_select
+        ));
         
         setlocale(LC_TIME, "spanish");
         $month = strftime("%B"); //devuelve: mes actual
