@@ -197,8 +197,10 @@ segundo_apellido,cedula,sueldo_diario,fecha_ingreso,cargo,departamento,concepto,
 funcion_concepto, cantidad, monto_calculado
 FROM ic_recibos_de_pago rp
 INNER JOIN ic_trabajadores t on t.codigo_empleado=rp.codigo_empleado
-WHERE '$user_login' = t.codigo_empleado AND SUBSTRING(fecha_movimiento,4,2)='$month_select' AND 
-funcion_concepto= 'ASIGNACION' ;");
+WHERE '$user_login' = t.codigo_empleado AND (SUBSTRING(fecha_movimiento,1,2)='$month_select' OR SUBSTRING(fecha_movimiento,1,1)='$month_select')
+AND (SUBSTRING(fecha_movimiento,6,4)='$year_select' OR SUBSTRING(fecha_movimiento,7,4)='$year_select')
+AND funcion_concepto= 'ASIGNACION' ;");
+
 
 $deducciones = $wpdb->get_results( "SELECT t.codigo_empleado codigo,primer_nombre,segundo_nombre,primer_apellido,
 segundo_apellido,cedula,sueldo_diario,fecha_ingreso,cargo,departamento,concepto,fecha_movimiento,
