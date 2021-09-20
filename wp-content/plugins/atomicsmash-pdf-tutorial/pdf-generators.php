@@ -186,8 +186,8 @@ function as_fpdf_create_admin_page2() {
 
 if (isset($_POST['generate_recibo_pago_pdf'])){
 
-$month_select = $_POST['month'];
-$year_select = $_POST['year'];
+$month_select = $_POST['month_rp'];
+$year_select = $_POST['year_rp'];
 
 $current_user = wp_get_current_user();
 $user_login = $current_user->user_login;
@@ -207,8 +207,9 @@ segundo_apellido,cedula,sueldo_diario,fecha_ingreso,cargo,departamento,concepto,
 funcion_concepto, cantidad, monto_calculado
 FROM ic_recibos_de_pago rp
 INNER JOIN ic_trabajadores t on t.codigo_empleado=rp.codigo_empleado
-WHERE '$user_login' = t.codigo_empleado AND SUBSTRING(fecha_movimiento,4,2)='$month_select' AND 
-funcion_concepto= 'DEDUCCION' ;");
+WHERE '$user_login' = t.codigo_empleado AND (SUBSTRING(fecha_movimiento,1,2)='$month_select' OR SUBSTRING(fecha_movimiento,1,1)='$month_select')
+AND (SUBSTRING(fecha_movimiento,6,4)='$year_select' OR SUBSTRING(fecha_movimiento,7,4)='$year_select')
+AND funcion_concepto= 'DEDUCCION' ;");
 
     if ($asignaciones and $deducciones != true){
         echo '<script>alert("No se encontraron resultados")</script>';
@@ -234,7 +235,7 @@ funcion_concepto= 'DEDUCCION' ;");
                 'codigo_empleado'=>$user_login,
                 'nombres'=>$e_nombre.' '.$e_s_nombre,
                 'apellidos'=>$e_p_apellido.' '.$e_s_apellido,
-                'periodo'=> $month_select .'/'.'20'.$year_select
+                'periodo'=> $month_select .'/'.$year_select
         ));
         
         setlocale(LC_TIME, "spanish");
@@ -570,7 +571,7 @@ funcion_concepto= 'DEDUCCION' ;");
             $pdf->SetDrawColor(16,22,114);
             $pdf->SetTextColor(0); 
             $pdf->SetXY($posicion_MulticeldaDX+273,$posicion_MulticeldaDY+138);
-            $pdf->Cell(37,7,utf8_decode($total_deducciones),1,1,'L',0);
+            $pdf->Cell(37,7,utf8_decode($total_deducciones+$total_asignaciones),1,1,'L',0);
             
     
         $pdf->Output('D','recibo-pago.pdf');
@@ -1626,8 +1627,8 @@ MENSAJE =" . $usermessage;
     }
 }else{
     $mensaje_ausencia= $_POST['mensaje_ausencia'];
-$fecha_ausencia = $_POST['fecha_ausencia'];
-$fecha_con_formato = strtotime($fecha_ausencia);
+    $fecha_ausencia = $_POST['fecha_ausencia'];
+    $fecha_con_formato = strtotime($fecha_ausencia);
 
 $new_date = date("d-m-Y", $fecha_con_formato );
 echo "Nombre: " . $nombre . '<br>';
@@ -1643,6 +1644,102 @@ echo "Nombre: " . $nombre . '<br>';
     mail($para, $asunto, $descripcion, $de);
 }
 
+}
+
+
+if(isset($_POST['add_new_employee'])){
+
+    $status = $_POST['status_trabajador'];
+    $codigo_trabajador_input = $_POST['codigo_trabajador_input'];
+    $nacionalidad_trabajador = $_POST['nacionalidad_trabajador'];
+    $cedula_trabajador = $_POST['cedula_trabajador'];
+    $rif_trabajador = $_POST['rif_trabajador'];
+    $primer_nombre_trabajador = $_POST['primer_nombre_trabajador'];
+    if(!isset($_POST['segundo_nombre_trabajador'])){
+        $segundo_nombre_trabajador = ' ';
+    }else{
+        $segundo_nombre_trabajador = $_POST['segundo_nombre_trabajador'];
+    }    
+    $primer_apellido_trabajador = $_POST['primer_apellido_trabajador'];
+    $segundo_apellido_trabajador = $_POST['segundo_apellido_trabajador'];
+    $direccion_uno_trabajador = $_POST['direccion_uno_trabajador'];
+    if (!isset($_POST['direccion_dos_trabajador'])){
+        $direccion_dos_trabajador = ' ';
+    }else{
+        $direccion_dos_trabajador = $_POST['direccion_dos_trabajador'];
+    }
+    $ciudad_residencia_trabajador = $_POST['ciudad_residencia_trabajador'];
+    $estado_residencia_trabajador = $_POST['estado_residencia_trabajador'];
+    $pais_residencia_trabajador = $_POST['pais_residencia_trabajador'];
+    $telefono_habitacion_trabajador = $_POST['telefono_habitacion_trabajador'];
+    $sexo_trabajador = $_POST['sexo_trabajador'];
+    $estado_civil_trabajador = $_POST['estado_civil_trabajador'];
+    $fecha_nacimiento = $_POST['fecha_nacimiento'];
+    $sueldo_trabajador = $_POST['sueldo_trabajador'];
+    $codigo_dpto = $_POST['codigo_dpto'];
+    $departamento_trabajador = $_POST['departamento_trabajador'];
+    $codigo_cargo = $_POST['codigo_cargo'];
+    $cargo_trabajador = $_POST['cargo_trabajador'];
+    $email_trabajador = $_POST['email_trabajador'];
+    $fecha_ingreso_trabajador = $_POST['fecha_ingreso_trabajador'];
+
+    $validar_codigo = $wpdb -> get_results( "SELECT codigo_empleado
+    FROM ic_trabajadores WHERE '$codigo_trabajador_input' = codigo_empleado;");
+
+    if ($validar_codigo==true){
+        echo "<script>alert('El codigo del trabajador ingresado ya pertenece a otro trabajador')</script>";
+    }else{
+
+        $insert_employee = $wpdb->insert(
+            'ic_trabajadores',
+                array(
+                    'status'=>$status,
+                    'codigo_empleado'=>$codigo_trabajador_input,
+                    'nacionalidad'=>$nacionalidad_trabajador,
+                    'cedula'=> $cedula_trabajador,
+                    'primer_nombre'=>$primer_nombre_trabajador,
+                    'segundo_nombre'=> $segundo_nombre_trabajador,
+                    'primer_apellido'=>$primer_apellido_trabajador,
+                    'segundo_apellido'=> $segundo_apellido_trabajador,
+                    'direccion_1'=> $direccion_uno_trabajador,
+                    'direccion_2'=> $direccion_dos_trabajador,
+                    'ciudad_residencia'=>$ciudad_residencia_trabajador,
+                    'edo_residencia'=>$estado_residencia_trabajador,
+                    'pais_residencia'=>$pais_residencia_trabajador,
+                    'telf_hab'=>$telefono_habitacion_trabajador,
+                    'sexo'=>$sexo_trabajador,
+                    'edo_civil'=>$estado_civil_trabajador,
+                    'fecha_nacimiento'=>$fecha_nacimiento,
+                    'sueldo_diario'=>$sueldo_trabajador,
+                    'codigo_dpto'=>$codigo_dpto,
+                    'departamento'=>$departamento_trabajador,
+                    'codigo_cargo'=>$codigo_cargo,
+                    'cargo'=>$cargo_trabajador,
+                    'email'=>$email_trabajador,
+                    'fecha_ingreso'=>$fecha_ingreso_trabajador
+                   
+            ));
+
+/*         $random_number = rand(0, 9);
+        $insert_employees_wp_users = $wpdb->insert(
+            'wp_users',
+                array(
+                    'user_login'=>$codigo_trabajador_input,
+                    'user_pass'=> $cedula_trabajador.$random_number,
+                    'user_nicename'=>$codigo_trabajador_input,
+                    'user_email'=>$email_trabajador,
+                    'user_url'=>'',
+                    'user_activation_key'=>'',
+                    'user_status'=>'0',
+                    'display_name'=>$primer_nombre_trabajador.' '.$segundo_nombre_trabajador.' '.$primer_apellido_trabajador.' '.$segundo_apellido_trabajador
+            )); */
+
+        if($insert_employee == true){
+            echo "<script>alert('Se ha agregado al trabajador exitosamente')</script>";
+        }else{
+            echo "<script>alert('Ha ocurrido un error. No se ha podido agregar al trabajador')</script>";
+        }
+    }
 }
 /* ====================================ENVIO DE GMAIL CON PDF ADJUNTO =======================================*/
 /* ====================================ENVIO DE GMAIL CON PDF ADJUNTO =======================================*/
