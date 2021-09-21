@@ -211,8 +211,9 @@ WHERE '$user_login' = t.codigo_empleado AND (SUBSTRING(fecha_movimiento,1,2)='$m
 AND (SUBSTRING(fecha_movimiento,6,4)='$year_select' OR SUBSTRING(fecha_movimiento,7,4)='$year_select')
 AND funcion_concepto= 'DEDUCCION' ;");
 
-    if ($asignaciones and $deducciones != true){
+    if ($asignaciones or $deducciones != true){
         echo '<script>alert("No se encontraron resultados")</script>';
+        echo "Not Found";
     }else{
 
         
