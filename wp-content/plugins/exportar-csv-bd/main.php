@@ -1,22 +1,12 @@
-<!-- <form method='post'>
-        <button type='submit' name='truncate_table'>Eliminar datos antiguos</button>
-</form>
-<p style="display: none; color: red" id='alerta_not_csv'><b>Ha ocurrido un error, puede que el archivo ingresado no sea .csv</b></p>
-<p style="display: none; color: red" id='alerta_invalid_csv'><b>Ha ocurrido un error, asegúrese que el archivo ingresado es el correcto</b></p>
-<p style="display: none; color: red" id='alerta_success'><b>Se han actualizado los días de vacaciones</b></p>
-<p style="display: none; color: red" id='alerta'><b>El sistema ha detectado que no ha eliminado los datos antiguos,
-por lo que se ha hecho automaticamente, por favor vuelva a cargar el archivo correspondiente y pulse 
-el botón de importación
-</b></p>
-
-<form method='post' enctype='multipart/form-data'>
-    <input type='file' name='import_file'>
-    <button type='submit' name='csv_import_file'>Actualizar Datos</button>
-</form> -->
-
-
-
 <?php
+
+/*
+* Plugin Name: Importar CSV a Base de Datos
+* Description: Plugin hecho para exportar un archivo CSV a la Base de Datos.
+* Version: 1.0
+* Author: Luis Vargas
+*/
+
 
 global $wpdb;
 

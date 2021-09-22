@@ -91,13 +91,17 @@ function output_pdf($e_primer_nombre,$e_segundo_nombre,$e_primer_apellido,$e_seg
         //devuelve: noviembre
         $week_day = date("j");
         $year = date("Y");
-        $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/08/logo-2.png';
 
         $pdf = new FPDF();
         $pdf->AddPage('portrait', 'letter');
         $pdf->SetFont( 'Arial', '', 12 );
         $pdf->Write(10, ' ');
-        $pdf->Image($ruta_imagen);
+        $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/09/LOGO-CORPAÑAL-SIN-RIF-GRIS.png';
+        $ruta_imagen_2 = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/09/LOGO-INDIO-CORPAÑAL-AZUL.png';
+        $pdf->Image($ruta_imagen,10,16,60,20);
+        $pdf->Image($ruta_imagen_2,100,14,20,20);
+        $pdf->Ln();
+        $pdf->Ln();
         $pdf->Ln();
         $pdf->Ln();
         $pdf->Ln();
@@ -109,7 +113,6 @@ function output_pdf($e_primer_nombre,$e_segundo_nombre,$e_primer_apellido,$e_seg
         $pdf->Ln();
         $pdf->Write(6,utf8_decode('Por medio de la presente se hace constar que el  Sr(a). ' . $e_primer_nombre. ' ' . $e_segundo_nombre . ' '.  $e_primer_apellido. ' '.$e_segundo_apellido. ', cedula de identidad No. '. $e_cedula. ' presta sus servicios en Industrias Corpañal, C.A desde '. $e_fecha_ingreso. ' , laborando como '. $e_cargo . ' , devegando un Sueldo Mensual de Bs. '. $e_sueldo. ' ')); 
         $pdf->Ln(); 
-        $pdf->Ln();
         $pdf->Ln();
         $pdf->Ln();
         $pdf->Ln();
@@ -130,10 +133,10 @@ function output_pdf($e_primer_nombre,$e_segundo_nombre,$e_primer_apellido,$e_seg
         $pdf->Ln();
         $pdf->Ln();
         $pdf->Ln();
+        $pdf->Ln();
         $pdf->Cell(0,3, utf8_decode('Aura Cañizales Terán'),0,2,'C');
         $pdf->Ln();
         $pdf->Cell(0,3, utf8_decode('Coordinadora de Recursos Humanos'),0,2,'C');
-        $pdf->Ln();
         $pdf->Ln();
         $pdf->Ln();
         $pdf->Ln();
@@ -142,13 +145,13 @@ function output_pdf($e_primer_nombre,$e_segundo_nombre,$e_primer_apellido,$e_seg
         $pdf->Write(10, ' ');
         $pdf->Ln();
         $pdf->Cell(0,3,utf8_decode('Urbanización Industrial Guayabal, Parcelas 12 y 13'),0,1,'C');
-        $pdf->Ln();
+        $pdf->Ln(1);
         $pdf->Cell(0,3,'Municipio Plaza - Guarenas. Edo. Miranda, Venezuela',0,2,'C');
-        $pdf->Ln();
+        $pdf->Ln(1);
         $pdf->Cell(0,3,'Telfs: (+58)(0212)8239105 - Fax: (+58)(0212)8239296',0,2,'C');
-        $pdf->Ln();
+        $pdf->Ln(1);
         $pdf->Cell(0,3,'0212-351-21-10',0,2,'C');
-        $pdf->Ln();
+        $pdf->Ln(1);
         $pdf->Cell(0,3,'www.Iccavenezuela.com',0,2,'C');
  
         $pdf->Output('D','constancia.pdf');
@@ -211,25 +214,25 @@ WHERE '$user_login' = t.codigo_empleado AND (SUBSTRING(fecha_movimiento,1,2)='$m
 AND (SUBSTRING(fecha_movimiento,6,4)='$year_select' OR SUBSTRING(fecha_movimiento,7,4)='$year_select')
 AND funcion_concepto= 'DEDUCCION' ;");
 
-    if ($asignaciones or $deducciones != true){
+foreach($asignaciones as $query){ //ASIGNACIONES Y DEDUCCIONES
+    $codigo_empleado = $query->codigo;
+    $e_nombre = $query->primer_nombre; 
+    $e_s_nombre = $query->segundo_nombre; 
+    $e_p_apellido = $query->primer_apellido; 
+    $e_s_apellido = $query->segundo_apellido; 
+    $e_cedula = $query->cedula; 
+    $e_sueldo = $query->sueldo_diario;
+    $e_fecha_ingreso = $query->fecha_ingreso; 
+    $e_cargo = $query->cargo;
+    $departamento = $query-> departamento;
+    //$total_asignaciones = $total_asignaciones + $e_sueldo;
+}
+
+    if ($asignaciones != true or $deducciones != true){
         echo '<script>alert("No se encontraron resultados")</script>';
-        echo "Not Found";
+        //print_r ($asignaciones."->".$deducciones);
     }else{
 
-        
-        foreach($asignaciones as $query){ //ASIGNACIONES Y DEDUCCIONES
-            $codigo_empleado = $query->codigo;
-            $e_nombre = $query->primer_nombre; 
-            $e_s_nombre = $query->segundo_nombre; 
-            $e_p_apellido = $query->primer_apellido; 
-            $e_s_apellido = $query->segundo_apellido; 
-            $e_cedula = $query->cedula; 
-            $e_sueldo = $query->sueldo_diario;
-            $e_fecha_ingreso = $query->fecha_ingreso; 
-            $e_cargo = $query->cargo;
-            $departamento = $query-> departamento;
-            //$total_asignaciones = $total_asignaciones + $e_sueldo;
-        }
         $insert = $wpdb->insert(
             'ic_recibos_de_pago_solicitados',
                 array(
@@ -245,7 +248,7 @@ AND funcion_concepto= 'DEDUCCION' ;");
         $year = date("Y");
         $pdf = new FPDF();
         $pdf->AddPage('L', 'legal');
-        $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/08/logo-2.png';
+        $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/09/LOGO-CORPANAL-CON-VOLUMEN-EN-BLANCO-3.png';
         //$pdf-> SetX(55);
         $pdf->Image($ruta_imagen,80,100,170,40);
         $pdf->SetFont( 'Arial', '', 20 );
@@ -258,7 +261,7 @@ AND funcion_concepto= 'DEDUCCION' ;");
     
         $pdf->SetTextColor(7,25,83); //COLOR AZUL PARA TEXTO DE CODIGO
         $pdf->SetFillColor(183,191,232); // FONDO GRIS PARA CODIGO
-        $pdf->Cell(25,10,utf8_decode('Codigo'),1,2,'C',true); //TEXTO DE CODIGO
+        $pdf->Cell(25,10,utf8_decode('CODIGO'),1,2,'C',true); //TEXTO DE CODIGO
     
         $pdf->SetTextColor(28, 27, 23); //COLOR NEGRO PARA TEXTO DEL NUMERO DE CODIGO 
         $pdf->Cell(25,10,utf8_decode($codigo_empleado),1,2,'C'); //TEXTO DEL NUMERO DE CODIGO
@@ -534,7 +537,7 @@ AND funcion_concepto= 'DEDUCCION' ;");
                 
                 $pdf->SetDrawColor(224,235,255); 
                 $pdf->SetXY($posicion_MulticeldaUX+30,$d_y2_position);
-                $pdf->Cell(100,5,$d_concepto, 0,1,'L');
+                $pdf->Cell(100,5,utf8_decode($d_concepto), 0,1,'L');
                 $d_y2_position = $d_y2_position+6;
             }
 
@@ -865,13 +868,22 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     $pdf->SetFont( 'Arial', '', 11 );
     $pdf->Write(5, ' ');
     $pdf->Ln();
-    $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/08/logo-2.png';
-    $pdf-> SetX(55);
-    $pdf->Image($ruta_imagen);
+    $pdf-> SetY(15);
+    $pdf-> SetX(10);
+    $pdf->Cell(35,20, utf8_decode(''),1,2,'C');
+    $pdf-> SetY(15);
+    $pdf-> SetX(45);
+    $pdf->Cell(75,20, utf8_decode(''),1,2,'C');
+    $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/09/LOGO-CORPAÑAL-SIN-RIF-GRIS.png';
+    $ruta_imagen_2 = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/09/LOGO-INDIO-CORPAÑAL-AZUL.png';
+    $pdf->Image($ruta_imagen,55,14,60,20);
+    $pdf->Image($ruta_imagen_2,20,16,18,18);
+    $pdf-> SetY(27);
     $pdf-> SetX(65);
     $pdf->SetFillColor(255,255,255);
-    $pdf->SetFont('Arial','B',11);
+    $pdf->SetFont('Arial','B',10);
     $pdf->Cell(40,10, utf8_decode('RIF.: J-30070620-6'),0,0,'C');
+    $pdf->SetFont('Arial','B',11);
     $pdf-> SetY(15);
     $pdf-> SetX(120);
     $pdf->Cell(55,10, utf8_decode('Fecha de Emisión: '. $month_number. '/'.$year),1,0,'C');
@@ -1133,15 +1145,29 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     $pdf->SetFont( 'Arial', '', 11 );
     $pdf->Write(5, ' ');
     $pdf->Ln();
-    $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/08/logo-2.png';
-    $pdf-> SetX(55);
-    $pdf->Image($ruta_imagen);
+
+    $pdf-> SetX(15);
+    $pdf->Cell(35,30, utf8_decode(''),1,0,'C');
+
+    $pdf-> SetX(15);
+    $pdf->Cell(110,30, utf8_decode(''),1,0,'C');
+
+    $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/09/LOGO-CORPAÑAL-SIN-RIF-GRIS.png';
+    $ruta_imagen_2 = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/09/LOGO-INDIO-CORPAÑAL-AZUL.png';
+    //$pdf-> SetX(25);
+    /* $pdf-> SetY(30);
+    $pdf-> SetX(25); */
+    $pdf->Image($ruta_imagen_2, 21,17,20,20);
     $pdf-> SetX(65);
+    $pdf->Image($ruta_imagen, 50,15,70,20);
+    $pdf-> SetY(26);
+    $pdf-> SetX(80);
     $pdf->SetFillColor(255,255,255);
-    $pdf->SetFont('Arial','B',11);
+    $pdf->SetFont('Arial','B',9);
     $pdf->Cell(40,10, utf8_decode('RIF.: J-30070620-6'),0,0,'C');
     $pdf-> SetY(15);
     $pdf-> SetX(125);
+    $pdf->SetFont('Arial','B',11);
     $pdf->MultiCell(48,7, utf8_decode('Fecha de Actualización: '.$month_number. '/'.$year),1,'C');
     $pdf->SetY(15);
     $pdf->SetX(173);
@@ -1155,15 +1181,20 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     $pdf->SetY(39);
     $pdf->SetX(125);
     $pdf->Cell(80,10, utf8_decode('Departamento Emisor: Recursos Humanos'),1,2,'C');
-    $pdf->SetX(15);
-    $pdf->Cell(63,7, utf8_decode('Fecha de Solicitud'),1,0,'C',1);
-    $pdf->Cell(63,7, utf8_decode('Código Trabajador'),1,0,'C',1);
-    $pdf->Cell(64,7, utf8_decode('Fecha de Ingreso'),1,2,'C',1);
+    $pdf->SetX(90);
     $pdf->SetFont('Arial','',12);
-    $pdf->SetX(15);
-    $pdf->Cell(63,7, utf8_decode($week_day_number. '/' . $month_number . '/' . $year),1,0,'C');
-    $pdf->Cell(63,7, utf8_decode($codigo_empleado),1,0,'C');
-    $pdf->Cell(64,7, utf8_decode($e_fecha_ingreso),1,2,'C');
+    $pdf->Cell(32,6, utf8_decode('Fecha de Solicitud'),0,0,'C',1);
+    $pdf->SetX(132);
+    $pdf->Cell(32,6, utf8_decode('Código Trabajador'),0,0,'C',1);
+    $pdf->SetX(172);
+    $pdf->Cell(32,6, utf8_decode('Fecha de Ingreso'),0,2,'C',1);
+    $pdf->SetX(90);
+    $pdf->Cell(32,7, utf8_decode($week_day_number. '/' . $month_number . '/' . $year),1,0,'C');
+    $pdf->SetX(132);
+    $pdf->Cell(32,7, utf8_decode($codigo_empleado),1,0,'C');
+    $pdf->SetX(172);
+    $pdf->Cell(32,7, utf8_decode($e_fecha_ingreso),1,2,'C');
+
     $pdf->SetX(15);
     $pdf->SetFont('Arial','B',12);
     $pdf->Ln(2);
@@ -1181,13 +1212,13 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     
     $pdf->Cell(80,7, utf8_decode($e_p_apellido . ' ' . $e_s_apellido . ' ' . $e_nombre .' '. $e_s_nombre),1,0,'C',1);
     $pdf->Cell(70,7, utf8_decode('C.I: ' . $e_cedula .' -- RIF: ' .$e_rif),1,0,'C');
-    $pdf->SetY(79);
+    $pdf->SetY(78);
     $pdf->SetX($pdf->GetX()+155);   
     $pdf->Cell(40,7, utf8_decode($e_estado_civil),1,2,'C',1);
 
     $pdf->Ln(1);
     $pdf->SetX(15);
-    $pdf->SetFont('Arial','B',10);
+    $pdf->SetFont('Arial','',9);
     $pdf->Cell(190,7, utf8_decode('MOTIVOS PARA LA SOLICITUD DEL ANTICIPO DE PRESTACIONES SOCIALES'),1,2,'C');
     if ($a==true){
         $pdf->SetX(15);
@@ -1252,7 +1283,7 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     $pdf->SetX(15);
     $pdf->MultiCell(100,8, utf8_decode('CANTIDAD APROBADA POR RRHH:   
     Bs.'),1,'L',1);
-    $pdf->SetY(124);
+    $pdf->SetY(118);
     $pdf->SetX(115);
     $pdf->SetFont('Arial','',9);
     $pdf->MultiCell(90,3.8, utf8_decode('EL TRABAJADOR TENDRÁ DERECHO AL ANTICIPO DE HASTA UN SETENTA Y CINCO POR CIENTO (75%) DE LO DEPOSITADO COMO GARANTIA DE SUS PRESTACIONES SOCIALES, PARA SATISFACER OBLIGACIONES MENCIONADAS EN CUADRO ANTERIOR, DE ACUERDO AL ARTICULO 144 DE LA LOTTT.
@@ -1276,17 +1307,17 @@ FECHA DE LA SOLICITUD
 .$week_day_number.'/'. $month_number.'/'.$year.'/'),'LRB','C');
 
     
-    $pdf->SetY(182.5);
+    $pdf->SetY(176.5);
     $pdf->SetX(81);
     $pdf->SetFont('Arial','',10);
-    $pdf->MultiCell(56,5, utf8_decode('
+    $pdf->MultiCell(56,6, utf8_decode('
 APELLIDOS Y NOMBRES
 C.I No: 
 _______________________
 FIRMA Y HUELLA DACTILAR'),1,'C');
 
     
-    $pdf->SetY(182.5);
+    $pdf->SetY(176.5);
     $pdf->SetX(137);
     $pdf->SetFont('Arial','',10);
     $pdf->MultiCell(68,5, utf8_decode('
@@ -1444,12 +1475,20 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     $pdf->SetFont( 'Arial', '', 11 );
     $pdf->Write(5, ' ');
     $pdf->Ln();
-    $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/08/logo-2.png';
-    $pdf-> SetX(55);
-    $pdf->Image($ruta_imagen);
-    $pdf-> SetX(65);
+    $pdf-> SetY(15);
+    $pdf-> SetX(15);
+    $pdf->Cell(35,25, utf8_decode(''),1,2,'C');
+    $pdf-> SetY(15);
+    $pdf-> SetX(50);
+    $pdf->Cell(75,25, utf8_decode(''),1,2,'C');
+    $ruta_imagen = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/09/LOGO-CORPAÑAL-SIN-RIF-GRIS.png';
+    $ruta_imagen_2 = 'http://localhost/Portal%20ICCA%20RRHH/wp-content/uploads/2021/09/LOGO-INDIO-CORPAÑAL-AZUL.png';
+    $pdf->Image($ruta_imagen,60,13,55,25);
+    $pdf->Image($ruta_imagen_2,23,17,20,20);
+    $pdf-> SetY(32);
+    $pdf-> SetX(90);
     $pdf->SetFillColor(255,255,255);
-    $pdf->SetFont('Arial','B',11);
+    $pdf->SetFont('Arial','B',9);
     $pdf->Cell(40,10, utf8_decode('RIF.: J-30070620-6'),0,0,'C');
     $pdf-> SetY(15);
     $pdf-> SetX(125);
