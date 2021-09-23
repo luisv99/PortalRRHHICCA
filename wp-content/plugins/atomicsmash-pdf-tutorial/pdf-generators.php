@@ -1065,7 +1065,6 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
 
 
     if($a and $monto_solicitado){
-        echo "<script>alert('a es true')</script>";
 
         $insert_prestaciones = $wpdb->insert(
             'ic_prestaciones_sociales',
@@ -1132,7 +1131,14 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
             ));
     }
 
+    $get_pdf_id_prestaciones = $wpdb->get_results( "SELECT ID
+    FROM ic_prestaciones_sociales 
+    WHERE '$user_login' = codigo_empleado 
+    ORDER BY fecha_emision DESC LIMIT 1;");
 
+    foreach($get_pdf_id_prestaciones as $id_pdf){ //ASIGNACIONES Y DEDUCCIONES
+        $id = $id_pdf->ID;
+        }
 
     setlocale(LC_TIME, "spanish");
     $month = strftime("%B"); //devuelve: mes actual
@@ -1173,7 +1179,7 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     $pdf->SetX(173);
     $pdf->Cell(32,14, utf8_decode('Pág: 1/1'),1,2,'C');
     $pdf->SetX($pdf->GetX()-48);
-    $pdf->Cell(80,10, utf8_decode('Código del Documento: RH-F-003'),1,0,'C');
+    $pdf->Cell(80,10, utf8_decode('Código del Documento: RH-F-003-'.$id),1,0,'C');
     $pdf->SetX(20);
     $pdf->SetY($pdf->GetY()+10);
     $pdf->SetX(15);
@@ -1362,9 +1368,12 @@ if (isset($_POST['generate_adelanto_qs_pdf'])){
     $current_user = wp_get_current_user();
     $user_login = $current_user->user_login;
 
-    $query_recibo_pago = $wpdb->get_results( "SELECT codigo_empleado, primer_nombre, segundo_nombre,primer_apellido,segundo_apellido,
-    cedula,sueldo_diario, fecha_ingreso, cargo, departamento, edo_civil, rif
-    FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
+    $query_recibo_pago = $wpdb->get_results( "SELECT codigo_empleado, primer_nombre, 
+    segundo_nombre,primer_apellido,segundo_apellido, cedula,sueldo_diario, fecha_ingreso, 
+    cargo, departamento, edo_civil, rif
+    FROM ic_trabajadores 
+    WHERE '$user_login' = codigo_empleado;");
+
 
 foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     $codigo_empleado = $query->codigo_empleado;
@@ -1462,7 +1471,14 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
             ));
         }
 
-
+        $get_pdf_id = $wpdb->get_results( "SELECT ID
+        FROM ic_adelanto_quincena_sueldo 
+        WHERE '$user_login' = codigo_empleado 
+        ORDER BY fecha DESC LIMIT 1;");
+    
+        foreach($get_pdf_id as $id_pdf){ //ASIGNACIONES Y DEDUCCIONES
+            $id = $id_pdf->ID;
+            }
 
     setlocale(LC_TIME, "spanish");
     $month = strftime("%B"); //devuelve: mes actual
@@ -1497,7 +1513,7 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     $pdf->SetX(173);
     $pdf->Cell(32,14, utf8_decode('Pág: 1/1'),1,2,'C');
     $pdf->SetX($pdf->GetX()-48);
-    $pdf->Cell(80,10, utf8_decode('Código del Documento: RH-F-003'),1,0,'C');
+    $pdf->Cell(80,10, utf8_decode('Código del Documento: RH-F-003-'.$id),1,0,'C');
     $pdf->SetX(20);
     $pdf->SetY($pdf->GetY()+10);
     $pdf->SetX(15);
