@@ -17,6 +17,7 @@ if(!function_exists('wp_get_current_user')) {
 }
 
 
+
 include( 'fpdf183/fpdf.php');
 include( 'atomicsmash-pdf-helper-functions.php');
 
@@ -85,6 +86,20 @@ function as_fpdf_create_admin_menu2() {
 /* ===============================OUTPUT DEL CONSTANCIA DE TRABAJO ========================================== */
 
     
+/**
+ * Funcion para emitir pdf de constancias de trabajo
+ * output_pdf
+ *
+ * @param  mixed $e_primer_nombre
+ * @param  mixed $e_segundo_nombre
+ * @param  mixed $e_primer_apellido
+ * @param  mixed $e_segundo_apellido
+ * @param  mixed $e_cedula
+ * @param  mixed $e_fecha_ingreso
+ * @param  mixed $e_sueldo
+ * @param  mixed $e_cargo
+ * @return void
+ */
 function output_pdf($e_primer_nombre,$e_segundo_nombre,$e_primer_apellido,$e_segundo_apellido, $e_cedula, $e_fecha_ingreso, $e_sueldo, $e_cargo) {
         setlocale(LC_TIME, "spanish");
         $month = strftime("%B");
@@ -201,7 +216,8 @@ funcion_concepto, cantidad, monto_calculado
 FROM ic_recibos_de_pago rp
 INNER JOIN ic_trabajadores t on t.codigo_empleado=rp.codigo_empleado
 WHERE '$user_login' = t.codigo_empleado AND (SUBSTRING(fecha_movimiento,1,2)='$month_select' OR SUBSTRING(fecha_movimiento,1,1)='$month_select')
-AND (SUBSTRING(fecha_movimiento,6,4)='$year_select' OR SUBSTRING(fecha_movimiento,7,4)='$year_select')
+AND (SUBSTRING(fecha_movimiento,6,4)='$year_select' OR SUBSTRING(fecha_movimiento,7,4)='$year_select' OR 
+SUBSTRING(fecha_movimiento,5,4 ='$year_select')
 AND funcion_concepto= 'ASIGNACION' ;");
 
 
@@ -211,7 +227,8 @@ funcion_concepto, cantidad, monto_calculado
 FROM ic_recibos_de_pago rp
 INNER JOIN ic_trabajadores t on t.codigo_empleado=rp.codigo_empleado
 WHERE '$user_login' = t.codigo_empleado AND (SUBSTRING(fecha_movimiento,1,2)='$month_select' OR SUBSTRING(fecha_movimiento,1,1)='$month_select')
-AND (SUBSTRING(fecha_movimiento,6,4)='$year_select' OR SUBSTRING(fecha_movimiento,7,4)='$year_select')
+AND (SUBSTRING(fecha_movimiento,6,4)='$year_select' OR SUBSTRING(fecha_movimiento,7,4)='$year_select' OR 
+SUBSTRING(fecha_movimiento,5,4)='$year_select')
 AND funcion_concepto= 'DEDUCCION' ;");
 
 foreach($asignaciones as $query){ //ASIGNACIONES Y DEDUCCIONES
@@ -600,7 +617,7 @@ if (isset($_POST['generate_vacaciones_pdf'])){
     cedula,sueldo_diario, fecha_ingreso, cargo, departamento 
     FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
 
-foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
+foreach($query_recibo_pago as $query){
     $codigo_empleado = $query->codigo_empleado;
     $e_nombre = $query->primer_nombre; 
     $e_s_nombre = $query->segundo_nombre; 
@@ -991,21 +1008,21 @@ if (isset($_POST['generate_p_sociales_pdf'])){
     cedula,sueldo_diario, fecha_ingreso, cargo, departamento, edo_civil, rif
     FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
 
-foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
-    $codigo_empleado = $query->codigo_empleado;
-    $e_nombre = $query->primer_nombre; 
-    $e_s_nombre = $query->segundo_nombre; 
-    $e_p_apellido = $query->primer_apellido; 
-    $e_s_apellido = $query->segundo_apellido; 
-    $e_cedula = $query->cedula; 
-    $e_sueldo = $query->sueldo_diario;
-    $e_fecha_ingreso = $query->fecha_ingreso; 
-    $e_cargo = $query->cargo;
-    $departamento = $query-> departamento;
-    $e_estado_civil = $query->edo_civil;
-    $e_rif = $query->rif;
-    //$total_asignaciones = $total_asignaciones + $e_sueldo;
-    }
+    foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
+        $codigo_empleado = $query->codigo_empleado;
+        $e_nombre = $query->primer_nombre; 
+        $e_s_nombre = $query->segundo_nombre; 
+        $e_p_apellido = $query->primer_apellido; 
+        $e_s_apellido = $query->segundo_apellido; 
+        $e_cedula = $query->cedula; 
+        $e_sueldo = $query->sueldo_diario;
+        $e_fecha_ingreso = $query->fecha_ingreso; 
+        $e_cargo = $query->cargo;
+        $departamento = $query-> departamento;
+        $e_estado_civil = $query->edo_civil;
+        $e_rif = $query->rif;
+        //$total_asignaciones = $total_asignaciones + $e_sueldo;
+        }
 
 
     if(strtolower($e_estado_civil)=="s"){
@@ -1139,6 +1156,7 @@ foreach($query_recibo_pago as $query){ //ASIGNACIONES Y DEDUCCIONES
     foreach($get_pdf_id_prestaciones as $id_pdf){ //ASIGNACIONES Y DEDUCCIONES
         $id = $id_pdf->ID;
         }
+
 
     setlocale(LC_TIME, "spanish");
     $month = strftime("%B"); //devuelve: mes actual
