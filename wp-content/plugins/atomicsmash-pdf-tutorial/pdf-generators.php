@@ -613,6 +613,14 @@ if (isset($_POST['generate_vacaciones_pdf'])){
     $current_user = wp_get_current_user();
     $user_login = $current_user->user_login;
 
+    $mis_dias_disponibles= $wpdb->get_results( "SELECT dias_disponibles 
+    FROM ic_dias_vacaciones_disponibles 
+    WHERE '$user_login' = codigo_empleado;");
+
+    foreach ($mis_dias_disponibles as $dia) {
+        $dias= $dia->dias_disponibles; 
+    }
+
     $query_recibo_pago = $wpdb->get_results( "SELECT codigo_empleado, primer_nombre, segundo_nombre,primer_apellido,segundo_apellido,
     cedula,sueldo_diario, fecha_ingreso, cargo, departamento 
     FROM ic_trabajadores WHERE '$user_login' = codigo_empleado;");
@@ -812,14 +820,28 @@ foreach($query_recibo_pago as $query){
     }else{
         $dias_totales_solicitados_sin_bono = $_POST['dias_totales_solicitados_sin_bono'];
     }
-
-
     
+    if($dias_totales_solicitados == ' '){
+        $aux1=false;
+    }else{
+        $aux1=true;
+        $dias_totales = $dias-$dias_totales_solicitados;
+    }
 
-    if ($dia_uno_bono and $mes_uno_bono and $ano_uno_bono and $dia_dos_bono and $mes_dos_bono and 
+    if($dias_totales_solicitados_sin_bono == ' '){
+        $aux2=false;
+    }else{
+        $aux2=true;
+        $dias_totales = $dias-$dias_totales_solicitados_sin_bono;
+    }
+
+    if(($aux1 or $aux2) and $dias_totales>=0){
+
+    if($dia_uno_bono and $mes_uno_bono and $ano_uno_bono and $dia_dos_bono and $mes_dos_bono and 
         $ano_dos_bono and $dias_a_disfrutar and $dia_uno_fecha_inicio and $mes_uno_fecha_inicio and 
         $ano_uno_fecha_inicio and $dia_uno_fecha_termino and $mes_uno_fecha_termino and 
         $ano_uno_fecha_termino and $dia_de_reintegro and $mes_de_reintegro and $ano_de_reintegro != ' '
+        
         ){
             $insert = $wpdb->insert(
                 'ic_solicitud_vacaciones',
@@ -833,6 +855,11 @@ foreach($query_recibo_pago as $query){
                     'tipo'=> 'CON BONO',
                     'modalidad'=> 'VIRTUAL'
             ));
+            $update_mis_dias=$wpdb->update(
+                'ic_dias_vacaciones_disponibles',
+                array( 'dias_disponibles' => $dias-$dias_totales_solicitados),
+                array( 'codigo_empleado' => $user_login )
+            );
 
 
 
@@ -842,7 +869,7 @@ foreach($query_recibo_pago as $query){
                 $ano_uno_fecha_inicio_sin_bono and $dia_dos_fecha_termino_sin_bono and 
                 $mes_dos_fecha_termino_sin_bono and $ano_dos_fecha_termino_sin_bono and 
                 $dia_de_reintegro_sin_bono and $mes_de_reintegro_sin_bono and $ano_de_reintegro_sin_bono != ' ' and
-                $dias_totales_solicitados_sin_bono 
+                $dias_totales_solicitados_sin_bono
     ){
 
                 $insert = $wpdb->insert(
@@ -857,6 +884,11 @@ foreach($query_recibo_pago as $query){
                         'tipo'=> 'SIN BONO',
                         'modalidad'=> 'VIRTUAL'
                     ));
+                    $update_mis_dias=$wpdb->update(
+                        'ic_dias_vacaciones_disponibles',
+                        array( 'dias_disponibles' => $dias-$dias_totales_solicitados_sin_bono),
+                        array( 'codigo_empleado' => $user_login )
+                    );
 
     }else{        
                 $insert = $wpdb->insert(
@@ -874,6 +906,8 @@ foreach($query_recibo_pago as $query){
                     
         }
 
+
+    
     setlocale(LC_TIME, "spanish");
     $month = strftime("%B"); //devuelve: mes actual
     $month_number = strftime("%m");
@@ -951,13 +985,13 @@ foreach($query_recibo_pago as $query){
     $pdf->Cell(190,7, utf8_decode('SOLICITUD DE DIAS VACACIONES VENCIDAS NO DISFRUTADAS SIN PAGO DE BONO VACACIONAL'),1,2,'C');
 
     $pdf->SetFont('Arial','',11);
-    $pdf->Cell(190,10, utf8_decode('CANTIDAD DE DÍAS A DISFRUTAR:  '. $dias_a_disfrutar_sin_bono  .'CORRESPONDIENTES AL PERIODO: '. $mes_correspondiente_al_periodo_sin_bono .'   /   '. $ano_correspondiente_al_periodo_sin_bono ),1,2,'L');
+    $pdf->Cell(190,10, utf8_decode('CANTIDAD DE DÍAS A DISFRUTAR:  '. $dias_a_disfrutar_sin_bono  .'     CORRESPONDIENTES AL PERIODO: '. $mes_correspondiente_al_periodo_sin_bono .'   /   '. $ano_correspondiente_al_periodo_sin_bono ),1,2,'L');
     $pdf->Cell(190,10, utf8_decode('FECHA DE INICIO DEL PERÍODO DE VACACIONES A DISFRUTAR: '. $dia_uno_fecha_inicio_sin_bono .'   /   '. $mes_uno_fecha_inicio_sin_bono .'   /   '. $ano_uno_fecha_inicio_sin_bono  ),1,2,'L');
     $pdf->Cell(190,10, utf8_decode('FECHA DE TERMINO DEL PERÍODO DE VACACIONES A DISFRUTAR: '.$dia_dos_fecha_termino_sin_bono  .'   /   '. $mes_dos_fecha_termino_sin_bono .'   / '.$ano_dos_fecha_termino_sin_bono  ),1,2,'L');
     
     $pdf->SetFont('Arial','',11);
     $pdf->Cell(85,20, utf8_decode('Días totales solicitados por el trabajador:    ' . $dias_totales_solicitados . $dias_totales_solicitados_sin_bono),1,0,'L');
-    $pdf->Cell(105,20, utf8_decode('Días pendientes después del reintegro de sus labores:__' ),1,2,'L');
+    $pdf->Cell(105,20, utf8_decode('Días pendientes después del reintegro de sus labores: '. $dias_totales),1,2,'L');
     $pdf->SetX(10);
 
     $pdf->SetFont('Arial','B',10);
@@ -985,7 +1019,13 @@ foreach($query_recibo_pago as $query){
     //Cell(ANCHO, ALTO, TEXTO, BORDE (1,0), ln(0,1,2), ALIGN(L,C,R), FONDO(BOOLEAN))
     $pdf->Output('D','solicitud-de-vacaciones.pdf');
     exit;
+
+}else{
+    echo "<script>alert('La cantidad de días totales solicitados es incorrecta.')</script>";
 }
+
+}
+
 
 /* ==================================== FIN PDF VACACIONES =======================================*/
 /* ==================================== FIN PDF VACACIONES =======================================*/
